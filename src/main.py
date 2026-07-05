@@ -79,10 +79,10 @@ Examples:
     
     # Validate input file
     if not os.path.exists(args.input):
-        print(f'✗ Error: Input file "{args.input}" not found')
+        print(f' Error: Input file "{args.input}" not found')
         sys.exit(1)
     
-    print_section('🤖 AutoML Project - Automated Machine Learning Pipeline')
+    print_section('AutoML Project - Automated Machine Learning Pipeline')
     
     try:
         # ==================== DATA LOADING ====================
@@ -118,7 +118,7 @@ Examples:
         X_train, X_test, y_train, y_test = trainer.split_data(X_selected, y)
         trainer.train_models(X_train, y_train)
         trainer.evaluate_models(X_test, y_test)
-        best_model_name, best_model, best_metrics = trainer.get_best_model()
+        best_model_name, best_model, best_metrics, _ = trainer.get_best_model()
         cv_results = trainer.cross_validate_best_model(X_selected, y)
         
         # ==================== REPORT GENERATION ====================
@@ -175,14 +175,14 @@ Examples:
         summary = reporter.generate_summary(trainer.results, best_model_name, best_metrics)
         print(summary)
         
-        print(f'\n📁 Generated Files:')
+        print(f'\n Generated Files:')
         for file in generated_files:
             print(f'   ✓ {file}')
         
-        print(f'\n✅ AutoML Pipeline Complete!')
+        print(f'\n AutoML Pipeline Complete!')
         
     except KeyboardInterrupt:
-        print('\n\n⏹️  Pipeline interrupted by user')
+        print('\n\n Pipeline interrupted by user')
         sys.exit(0)
     except Exception as e:
         print(f'\n✗ Error: {str(e)}')

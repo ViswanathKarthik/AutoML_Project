@@ -38,7 +38,7 @@ class ReportGenerator:
         with open(filepath, 'w') as f:
             json.dump(json_results, f, indent=2)
         
-        print(f'✓ JSON report saved: {filepath}')
+        print(f' JSON report saved: {filepath}')
         return filepath
     
     def generate_csv_report(self, results: Dict, filename: str = None) -> str:
@@ -55,7 +55,7 @@ class ReportGenerator:
         df.index.name = 'Model'
         df.to_csv(filepath)
         
-        print(f'✓ CSV report saved: {filepath}')
+        print(f' CSV report saved: {filepath}')
         return filepath
     
     def generate_html_report(self, results: Dict, model_info: Dict = None, filename: str = None) -> str:
@@ -130,7 +130,7 @@ class ReportGenerator:
         </head>
         <body>
             <div class="container">
-                <h1>🤖 AutoML Project Report</h1>
+                <h1> AutoML Project Report</h1>
                 <div class="info">
                     <strong>Generated:</strong> {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
                 </div>
@@ -195,7 +195,7 @@ class ReportGenerator:
         with open(filepath, 'w') as f:
             f.write(html_content)
         
-        print(f'✓ HTML report saved: {filepath}')
+        print(f'HTML report saved: {filepath}')
         return filepath
     
     def generate_pdf_report(self, html_filepath: str = None, filename: str = None) -> str:
@@ -205,7 +205,7 @@ class ReportGenerator:
         try:
             from weasyprint import HTML
         except ImportError:
-            print('✗ WeasyPrint not installed. Install with: pip install weasyprint')
+            print(' WeasyPrint not installed. Install with: pip install weasyprint')
             return None
         
         if filename is None:
@@ -217,13 +217,13 @@ class ReportGenerator:
             if html_filepath:
                 HTML(html_filepath).write_pdf(filepath)
             else:
-                print('✗ HTML filepath required for PDF generation')
+                print(' HTML filepath required for PDF generation')
                 return None
             
-            print(f'✓ PDF report saved: {filepath}')
+            print(f'PDF report saved: {filepath}')
             return filepath
         except Exception as e:
-            print(f'✗ Error generating PDF: {str(e)}')
+            print(f' Error generating PDF: {str(e)}')
             return None
     
     def generate_summary(self, results: Dict, best_model: str, best_metrics: Dict) -> str:

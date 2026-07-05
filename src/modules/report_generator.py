@@ -600,7 +600,7 @@ class AutoMLReport:
 
         doc.build(elements)
 
-        print(f"\n✓ AutoML report generated: {filepath}")
+        print(f"\n AutoML report generated: {filepath}")
     def feature_statistics(self, df):
 
         stats = []

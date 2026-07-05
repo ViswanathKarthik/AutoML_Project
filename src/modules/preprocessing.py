@@ -23,7 +23,7 @@ class DataPreprocessor:
 
         df = pd.read_csv(filepath)
 
-        print(f"✓ Data loaded: {df.shape[0]} rows, {df.shape[1]} columns")
+        print(f" Data loaded: {df.shape[0]} rows, {df.shape[1]} columns")
 
         return df
 
@@ -109,7 +109,7 @@ class DataPreprocessor:
 
         self.preprocessing_summary["duplicates_removed"] = int(removed)
 
-        print(f"✓ Removed {removed} duplicates")
+        print(f" Removed {removed} duplicates")
 
         return df
 
@@ -164,14 +164,12 @@ class DataPreprocessor:
 
     def preprocess(self, df, target):
 
-        y = df[target]
+        df = self.remove_duplicates(df)
 
+        y = df[target]
         X = df.drop(columns=[target])
 
         X = self.handle_missing(X)
-
-        X = self.remove_duplicates(X)
-
         X = self.handle_outliers(X)
 
         print_subsection("Preprocessing Complete")

@@ -13,9 +13,13 @@ from sklearn.metrics import (
 from typing import Dict, Tuple, List
 from .utils import print_subsection, print_section
 import config
-import shap
 import pandas as pd
 import numpy as np
+
+try:
+    import shap
+except ImportError:  # pragma: no cover - optional runtime dependency
+    shap = None
 
 
 class ModelTrainer:
@@ -57,9 +61,9 @@ class ModelTrainer:
             stratify=y if self.problem_type == 'classification' else None
         )
         
-        print(f'✓ Training set: {X_train.shape[0]} samples')
-        print(f'✓ Test set: {X_test.shape[0]} samples')
-        print(f'✓ Features: {X_train.shape[1]}')
+        print(f' Training set: {X_train.shape[0]} samples')
+        print(f' Test set: {X_test.shape[0]} samples')
+        print(f' Features: {X_train.shape[1]}')
         
         return X_train, X_test, y_train, y_test
     
@@ -75,11 +79,11 @@ class ModelTrainer:
                 print(f'  Training {model_name}...', end=' ')
                 model.fit(X_train, y_train)
                 self.models[model_name] = model
-                print('✓')
+                print('')
             except Exception as e:
                 print(f'✗ Error: {str(e)}')
         
-        print(f'\n✓ Trained {len(self.models)} models')
+        print(f'\n Trained {len(self.models)} models')
         return self.models
     
     def evaluate_models(self, X_test: pd.DataFrame, y_test: pd.Series) -> Dict[str, Dict]:
@@ -92,7 +96,7 @@ class ModelTrainer:
             y_pred = model.predict(X_test)
             
             if self.problem_type == 'classification':
-                metrics = self._get_classification_metrics(y_test, y_pred, model_name, model)
+                metrics = self._get_classification_metrics(y_test, y_pred, model_name, model, X_test)
             else:
                 metrics = self._get_regression_metrics(y_test, y_pred)
             
@@ -105,7 +109,7 @@ class ModelTrainer:
         
         return self.results
     
-    def _get_classification_metrics(self, y_test: pd.Series, y_pred: np.ndarray, model_name: str, model) -> Dict[str, float]:
+    def _get_classification_metrics(self, y_test: pd.Series, y_pred: np.ndarray, model_name: str, model, X_test: pd.DataFrame) -> Dict[str, float]:
         """Calculate classification metrics"""
         metrics = {
             'Accuracy': accuracy_score(y_test, y_pred),
@@ -117,9 +121,13 @@ class ModelTrainer:
         # Add ROC-AUC if binary classification
         if len(np.unique(y_test)) == 2:
             try:
-                y_pred_proba = model.predict_proba(y_test.values.reshape(-1, 1))[:, 1] if hasattr(model, 'predict_proba') else y_pred
-                metrics['ROC-AUC'] = roc_auc_score(y_test, y_pred_proba if hasattr(model, 'predict_proba') else y_pred)
-            except:
+                if hasattr(model, 'predict_proba'):
+                    probabilities = model.predict_proba(X_test)
+                    y_pred_proba = probabilities[:, 1]
+                else:
+                    y_pred_proba = y_pred
+                metrics['ROC-AUC'] = roc_auc_score(y_test, y_pred_proba)
+            except Exception:
                 metrics['ROC-AUC'] = 0.0
         
         return metrics
@@ -155,7 +163,7 @@ class ModelTrainer:
         self.best_score = self.results[best_model_name]
         self.importance_df = None
         
-        print(f'✓ Best Model: {best_model_name}')
+        print(f' Best Model: {best_model_name}')
         print(f'Metrics:')
         for metric, value in self.best_score.items():
             print(f'  {metric}: {value:.4f}')
@@ -166,6 +174,8 @@ class ModelTrainer:
         best_model = self.models[best_model_name]
 
         try:
+            if shap is None:
+                raise ImportError("shap is not installed")
 
             # Tree models are faster with TreeExplainer
             if best_model_name in ["Random Forest", "Gradient Boosting"]:
@@ -224,3 +234,7 @@ class ModelTrainer:
                 print(f'  {key}: {scores.mean():.4f} (+/- {scores.std():.4f})')
         
         return cv_results
+
+    def get_feature_importance_df(self):
+        """Return the SHAP-based feature importance DataFrame if available."""
+        return getattr(self, 'importance_df', None)

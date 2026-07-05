@@ -1,0 +1,30 @@
+{
+  "Logistic Regression": {
+    "Accuracy": 1.0,
+    "Precision": 1.0,
+    "Recall": 1.0,
+    "F1-Score": 1.0,
+    "ROC-AUC": 1.0
+  },
+  "Random Forest": {
+    "Accuracy": 1.0,
+    "Precision": 1.0,
+    "Recall": 1.0,
+    "F1-Score": 1.0,
+    "ROC-AUC": 1.0
+  },
+  "Gradient Boosting": {
+    "Accuracy": 1.0,
+    "Precision": 1.0,
+    "Recall": 1.0,
+    "F1-Score": 1.0,
+    "ROC-AUC": 1.0
+  },
+  "SVM": {
+    "Accuracy": 1.0,
+    "Precision": 1.0,
+    "Recall": 1.0,
+    "F1-Score": 1.0,
+    "ROC-AUC": 1.0
+  }
+}

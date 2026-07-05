@@ -74,11 +74,11 @@ if __name__ == '__main__':
         with open("automl_full.pkl", "wb") as f:
             pickle.dump(artifact, f)
 
-        print("✅ Model + pipeline saved as automl_full.pkl")
+        print(" Model + pipeline saved as automl_full.pkl")
         
-        print(f'\n✅ Test completed successfully!')
-        print(f'✓ Best Model: {best_model}')
-        print(f'✓ Sample Metric: {list(best_metrics.values())[0]:.4f}')
+        print(f'\n Test completed successfully!')
+        print(f' Best Model: {best_model}')
+        print(f' Sample Metric: {list(best_metrics.values())[0]:.4f}')
         print("\n[5/5] Generating AutoML report...")
     pipeline_logs = log_buffer.getvalue()
     report = AutoMLReport()
