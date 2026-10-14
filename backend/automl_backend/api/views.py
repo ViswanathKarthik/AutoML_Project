@@ -54,20 +54,32 @@ def url_for(path):
     return f"{settings.MEDIA_URL.rstrip('/')}/{rel}"
 
 
-def build_histograms(X, max_features=10):
+def build_histograms(X, max_features=None):
     histograms = {}
-    numeric_cols = X.select_dtypes(include=['number']).columns.tolist()
+    cols = X.columns.tolist()
 
-    for col in numeric_cols[:max_features]:
+    if max_features is not None:
+        cols = cols[:max_features]
+
+    for col in cols:
         values = X[col].dropna()
         if len(values) == 0:
             continue
 
-        counts, edges = np.histogram(values, bins=10)
-        histograms[col] = {
-            'bins': [float(x) for x in edges.tolist()],
-            'counts': [int(x) for x in counts.tolist()]
-        }
+        if pd.api.types.is_numeric_dtype(values):
+            counts, edges = np.histogram(values, bins=10)
+            histograms[col] = {
+                'type': 'numeric',
+                'bins': [float(x) for x in edges.tolist()],
+                'counts': [int(x) for x in counts.tolist()]
+            }
+        else:
+            counts = values.astype(str).value_counts().sort_index()
+            histograms[col] = {
+                'type': 'categorical',
+                'bins': [str(x) for x in counts.index.tolist()],
+                'counts': [int(x) for x in counts.tolist()]
+            }
 
     return histograms
 
@@ -91,14 +103,16 @@ def preview_csv(request):
         return JsonResponse({'error': 'Only CSV files are supported.'}, status=400)
 
     try:
-        df = pd.read_csv(uploaded_file, nrows=10)
+        df = pd.read_csv(uploaded_file)
         columns = df.columns.tolist()
-        preview = df.fillna('').to_dict(orient='records')
+        preview = df.head(10).fillna('').to_dict(orient='records')
+        histograms = build_histograms(df)
 
         return JsonResponse({
             'status': 'success',
             'columns': columns,
             'preview': preview,
+            'histograms': histograms,
         })
     except Exception as exc:
         return JsonResponse({'error': str(exc)}, status=500)
@@ -172,12 +186,40 @@ def run_pipeline(request):
         reporter = ReportGenerator(output_dir=report_root)
         json_file = reporter.generate_json_report(trainer.results)
         csv_file = reporter.generate_csv_report(trainer.results)
-        html_file = reporter.generate_html_report(trainer.results, {
-            'Problem Type': problem_type,
-            'Best Model': best_model_name,
-            'Features Selected': X_selected.shape[1],
+
+        dataset_summary = {
             'Rows': len(df),
-        })
+            'Columns': len(df.columns),
+            'Target': target,
+            'Problem Type': problem_type,
+            'Features Selected': X_selected.shape[1],
+            'Training Samples': len(X_train),
+            'Test Samples': len(X_test),
+            'Best Model': best_model_name,
+        }
+
+        try:
+            correlation_matrix = X_selected.corr(numeric_only=True)
+        except Exception:
+            correlation_matrix = X_selected.corr()
+
+        html_file = reporter.generate_html_report(
+            trainer.results,
+            {
+                'Problem Type': problem_type,
+                'Best Model': best_model_name,
+                'Features Selected': X_selected.shape[1],
+                'Rows': len(df),
+                'Target': target,
+            },
+            selected_features=X_selected.columns.tolist(),
+            feature_importance=feature_importance,
+            histograms=histograms,
+            preprocessing_summary=preprocessor.preprocessing_summary,
+            selection_log=getattr(selector, 'selection_log', {}),
+            correlation_matrix=correlation_matrix,
+            dataset_summary=dataset_summary,
+        )
 
         return JsonResponse({
             'status': 'success',

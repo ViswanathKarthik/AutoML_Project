@@ -126,7 +126,7 @@ AutoML_Project/
 
 ```
 ================================================================================
-                🤖 AutoML Project - Automated Machine Learning Pipeline
+                 AutoML Project - Automated Machine Learning Pipeline
 ================================================================================
 
 ...

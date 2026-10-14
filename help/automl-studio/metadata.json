@@ -1,0 +1,6 @@
+{
+  "name": "AutoML Studio",
+  "description": "An interactive machine learning workbench for uploading datasets, training models in-browser, visualizing performance dashboards, comparing algorithms, and downloading production-ready models.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
